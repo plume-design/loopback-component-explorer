@@ -8,11 +8,7 @@
 const loopback = require('loopback');
 const explorer = require('../');
 const request = require('supertest');
-const assert = require('assert');
-const path = require('path');
 const expect = require('chai').expect;
-const urlJoin = require('../lib/url-join');
-const os = require('os');
 
 describe('explorer', function() {
   describe('with default config', function() {
@@ -34,17 +30,11 @@ describe('explorer', function() {
       request(this.app)
         .get('/explorer/')
         .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
-          assert(!!~res.text.indexOf('<title>LoopBack API Explorer</title>'),
-            'text does not contain expected string');
-
-          done();
-        });
+        .expect(404)
+        .end(done);
     });
 
-    it('should serve correct swagger-ui config', function(done) {
+    it('should serve correct swagger config', function(done) {
       request(this.app)
         .get('/explorer/config.json')
         .expect('Content-Type', /json/)
@@ -63,19 +53,11 @@ describe('explorer', function() {
   describe('when filename is included in url', function() {
     beforeEach(givenLoopBackAppWithExplorer());
 
-    it('should serve the explorer at /explorer/index.html', function(done) {
+    it('should not serve the explorer at /explorer/index.html', function(done) {
       request(this.app)
         .get('/explorer/index.html')
-        .expect('Content-Type', /html/)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) throw err;
-
-          assert(!!~res.text.indexOf('<title>LoopBack API Explorer</title>'),
-            'text does not contain expected string');
-
-          done();
-        });
+        .expect(404)
+        .end(done);
     });
 
     it('should serve correct swagger-ui config', function(done) {
@@ -163,77 +145,6 @@ describe('explorer', function() {
     });
   });
 
-  describe('with custom front-end files', function() {
-    let app;
-    beforeEach(function setupExplorerWithUiDirs() {
-      app = loopback();
-      app.set('remoting', {cors: false});
-      explorer(app, {
-        uiDirs: [path.resolve(__dirname, 'fixtures', 'dummy-swagger-ui')],
-      });
-    });
-
-    it('overrides swagger-ui files', function(done) {
-      request(app).get('/explorer/swagger-ui.js')
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
-
-          // expect the content of `dummy-swagger-ui/swagger-ui.js`
-          expect(res.text).to.contain('/* custom swagger-ui file */');
-
-          done();
-        });
-    });
-
-    it('overrides strongloop overrides', function(done) {
-      request(app).get('/explorer/')
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
-          // expect the content of `dummy-swagger-ui/index.html`
-          expect(res.text).to.contain('custom index.html');
-          done();
-        });
-    });
-  });
-
-  describe('with swaggerUI option', function() {
-    let app;
-    beforeEach(function setupExplorerWithoutUI() {
-      app = loopback();
-      app.set('remoting', {cors: false});
-      explorer(app, {
-        swaggerUI: false,
-      });
-    });
-
-    it('overrides swagger-ui files', function(done) {
-      request(app).get('/explorer/swagger-ui.js')
-        .expect(404, done);
-    });
-
-    it('should serve config.json', function(done) {
-      request(app)
-        .get('/explorer/config.json')
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
-
-          expect(res.body).to
-            .have.property('url', '/explorer/swagger.json');
-
-          done();
-        });
-    });
-
-    it('should serve swagger.json', function(done) {
-      request(app)
-        .get('/explorer/swagger.json')
-        .expect(200, done);
-    });
-  });
-
   describe('explorer.routes API', function() {
     let app;
     beforeEach(function() {
@@ -253,44 +164,6 @@ describe('explorer', function() {
         .expect('Content-Type', /json/)
         .expect(200)
         .end(done);
-    });
-  });
-
-  describe('when specifying custom static file root directories', function() {
-    let app;
-    beforeEach(function() {
-      app = loopback();
-      app.set('remoting', {cors: false});
-    });
-
-    it('should allow `uiDirs` to be defined as an Array', function(done) {
-      explorer(app, {
-        uiDirs: [path.resolve(__dirname, 'fixtures', 'dummy-swagger-ui')],
-      });
-
-      request(app).get('/explorer/')
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
-          // expect the content of `dummy-swagger-ui/index.html`
-          expect(res.text).to.contain('custom index.html');
-          done();
-        });
-    });
-
-    it('should allow `uiDirs` to be defined as an String', function(done) {
-      explorer(app, {
-        uiDirs: path.resolve(__dirname, 'fixtures', 'dummy-swagger-ui'),
-      });
-
-      request(app).get('/explorer/')
-        .expect(200)
-        .end(function(err, res) {
-          if (err) return done(err);
-          // expect the content of `dummy-swagger-ui/index.html`
-          expect(res.text).to.contain('custom index.html');
-          done();
-        });
     });
   });
 
