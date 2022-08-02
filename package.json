@@ -12,10 +12,6 @@
     "test": "mocha",
     "posttest": "npm run lint"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/strongloop/loopback-component-explorer.git"
-  },
   "keywords": [
     "loopback",
     "api",
