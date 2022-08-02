@@ -5,21 +5,6 @@
 
 'use strict';
 
-// NOTE(bajtos) It's important to run this check before we load the Explorer
-// because require() may fail (e.g. with MODULE_NOT_FOUND error) and make
-// it difficult to identify the actual problem
-const uiVersion = require('../package.json').dependencies['swagger-ui'];
-if (!uiVersion.startsWith('^2')) {
-  console.error(`
-Upgrading from swagger-ui@2 to a newer major version (${uiVersion}) is difficult,
-see https://github.com/strongloop/loopback-component-explorer/issues/254
-If you are confident about this change and have manually verified API Explorer
-functionality in the browser, including access-token based authentication,
-then you can delete this check.
-`);
-  process.exit(2);
-}
-
 const loopback = require('loopback');
 const explorer = require('../');
 const request = require('supertest');
@@ -38,21 +23,20 @@ describe('explorer', function() {
         .to.have.property('mountPath', '/explorer');
     });
 
-    it('should redirect to /explorer/', function(done) {
+    it('should return 404 not found', function(done) {
       request(this.app)
         .get('/explorer')
-        .expect(301)
+        .expect(404)
         .end(done);
     });
 
     it('should serve the explorer at /explorer/', function(done) {
       request(this.app)
         .get('/explorer/')
-        .expect('Content-Type', /html/)
+        .expect('Content-Type', /json/)
         .expect(200)
         .end(function(err, res) {
           if (err) return done(err);
-
           assert(!!~res.text.indexOf('<title>LoopBack API Explorer</title>'),
             'text does not contain expected string');
 
