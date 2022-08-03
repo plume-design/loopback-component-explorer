@@ -21,10 +21,10 @@
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "^3.2.0",
-    "eslint": "^5.13.0",
-    "eslint-config-loopback": "^13.0.0",
+    "eslint": "^8.11.0",
+    "eslint-config-plume": "git+ssh://git@github.com/plume-design/eslint-config-plume.git#1.1.4",
     "loopback": "^3.19.0",
-    "mocha": "^5.2.0",
+    "mocha": "^10.0.0",
     "supertest": "^3.1.0"
   },
   "license": "MIT",
@@ -32,7 +32,8 @@
     "debug": "^3.1.0",
     "lodash": "^4.17.11",
     "loopback-swagger": "^5.0.0",
-    "strong-globalize": "^4.1.1"
+    "strong-globalize": "^4.1.1",
+    "swagger-ui-dist": "^4.13.2"
   },
   "resolutions": {
     "minimist": "1.2.6",
