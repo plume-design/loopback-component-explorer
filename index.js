@@ -16,6 +16,23 @@ const createSwaggerObject = require('loopback-swagger').generateSwaggerSpec;
 const SWAGGER_UI_ROOT = require('swagger-ui-dist').getAbsoluteFSPath();
 const STATIC_ROOT = path.join(__dirname, 'public');
 
+function addConsumesOnFormData(swaggerObject) {
+  // change swaggerObject.paths.parameters that have "in": "formData" and add "consumes": ["application/x-www-form-urlencoded"]
+  for (let path in swaggerObject.paths) {
+    for (let method in swaggerObject.paths[path]) {
+      let parameters = swaggerObject.paths[path][method].parameters;
+      if (parameters) {
+        for (let i = 0; i < parameters.length; i++) {
+          if (parameters[i].in === 'formData') {
+            swaggerObject.paths[path][method].consumes = ['application/x-www-form-urlencoded'];
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
 
 /**
  * Setup Swagger documentation on the given express app.
@@ -28,9 +45,11 @@ const STATIC_ROOT = path.join(__dirname, 'public');
  */
 function mountSwagger(loopbackApplication, swaggerApp, opts) {
   let swaggerObject = createSwaggerObject(loopbackApplication, opts);
+  addConsumesOnFormData(swaggerObject);
 
   function rebuildSwaggerObject() {
     swaggerObject = createSwaggerObject(loopbackApplication, opts);
+    addConsumesOnFormData(swaggerObject);
   }
 
   // listening to modelRemoted event for updating the swaggerObject
